@@ -1,3 +1,7 @@
 package com.example.createplanetapp
 
-class ItemsViewModel(val images: IntArray, val title: String)
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+class ItemsViewModel(val images: IntArray, val title: String, val description: String) : Parcelable
