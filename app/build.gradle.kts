@@ -52,4 +52,5 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.dotsindicator)
     implementation(libs.commons.csv)
+    implementation(libs.coil)
 }
