@@ -69,7 +69,6 @@
                     android:gravity="center"
                     android:backgroundTint="@color/black"
                     android:text="Забронировать"/>
-
             </LinearLayout>
         </FrameLayout>
     </androidx.cardview.widget.CardView>
