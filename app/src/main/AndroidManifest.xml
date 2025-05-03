@@ -15,9 +15,6 @@
         android:theme="@style/Theme.CreatePlanetApp"
         tools:targetApi="31">
         <activity
-            android:name=".ViewPagerAdapter"
-            android:exported="false" />
-        <activity
             android:name=".ItemActivity"
             android:exported="false" />
         <activity
