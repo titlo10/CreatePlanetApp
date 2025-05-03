@@ -17,9 +17,10 @@ class Orders : Fragment() {
 
         val itemsList: RecyclerView = view.findViewById(R.id.orders_list)
         val items = csvParser(resources, R.raw.po_gorodu)
+        items.addAll(csvParser(resources, R.raw.zagorodnie))
 
         itemsList.layoutManager = LinearLayoutManager(context)
-        itemsList.adapter = OrdersAdapter(items, this)
+        itemsList.adapter = OrdersAdapter(items, requireContext())
 
         return view
     }

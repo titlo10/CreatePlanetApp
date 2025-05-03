@@ -53,4 +53,5 @@ dependencies {
     implementation(libs.dotsindicator)
     implementation(libs.commons.csv)
     implementation(libs.coil)
+    implementation(libs.expandabletextview)
 }
