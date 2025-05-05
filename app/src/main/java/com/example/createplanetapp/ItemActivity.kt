@@ -30,7 +30,7 @@ class ItemActivity : AppCompatActivity() {
         expandableList.setIndicatorBounds(0,150)
         val groups = listOf("Об экскурсии")
         val item = mapOf(
-            "Об экскурсии" to listOf(text)
+            "Об экскурсии" to listOf(text?.replace("<br />", ""))
             )
 
         // Создание адаптера

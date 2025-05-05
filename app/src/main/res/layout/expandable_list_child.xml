@@ -11,6 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:fontFamily="@font/kazimir_text_regular"/>
+        android:fontFamily="@font/kazimir_text_regular"
+        android:clickable="false"
+        android:contextClickable="false"/>
 
 </LinearLayout>

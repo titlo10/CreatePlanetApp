@@ -5,4 +5,9 @@
     <string name="bottom_favorites">Избранное</string>
     <string name="bottom_orders">Заказы</string>
     <string name="order_details">Детали заказа</string>
+    <string-array name="languages">
+        <item>English</item>
+        <item>German</item>
+        <item>Russian</item>
+    </string-array>
 </resources>
