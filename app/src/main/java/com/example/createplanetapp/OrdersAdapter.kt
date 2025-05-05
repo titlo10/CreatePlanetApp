@@ -34,19 +34,13 @@ class OrdersAdapter(var items: List<ItemsViewModel>, val context: android.conten
         holder.desc.text = items[position].description
         holder.image.load(items[position].photo[0])
 
-        val excursions = items[position].excursions
-        val allFirstLevel = excursions.keys.toList()
-        val allSecondLevel = excursions.flatMap { it.value.keys }
-        val allThirdLevel = excursions.flatMap { it.value.values.flatMap { it.keys } }
-        val Prices = excursions.flatMap { it.value.values.flatMap { it.values } }
-
         holder.button.setOnClickListener{
             val intent = Intent(context, ItemActivity::class.java)
             intent.putExtra("itemTitle", items[position].title)
             intent.putExtra("itemDesc", items[position].description)
             intent.putExtra("itemText", items[position].text)
             intent.putExtra("itemPhotos", items[position].photo.toTypedArray())
-            intent.putExtra("itemExcursions", items[position])
+            intent.putExtra("position", position)
             context.startActivity(intent)
         }
     }
