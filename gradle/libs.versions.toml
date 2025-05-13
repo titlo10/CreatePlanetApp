@@ -1,7 +1,10 @@
 [versions]
-agp = "8.8.2"
+agp = "8.9.1"
+coil = "2.6.0"
+commonsCsv = "1.9.0"
 coreSplashscreen = "1.0.1"
 dotsindicator = "5.1.0"
+expandabletextview = "0.1.4"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -15,7 +18,10 @@ constraintlayout = "2.2.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "commonsCsv" }
 dotsindicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsindicator" }
+expandabletextview = { module = "com.ms-square:expandableTextView", version.ref = "expandabletextview" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

@@ -14,7 +14,6 @@ class Catalog : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_catalog, container, false)
-        val data = arguments?.getParcelableArrayList<ItemsViewModel>("dataTest") ?: arrayListOf()
 
         //val spinner: Spinner = view.findViewById(R.id.catalog_options_spinner)
         //var tourOptions = arrayOf("Школьникам", "Семьям")

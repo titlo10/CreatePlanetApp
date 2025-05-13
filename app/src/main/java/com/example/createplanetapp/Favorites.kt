@@ -12,7 +12,6 @@ class Favorites : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_favorites, container, false)
-        val data = arguments?.getParcelableArrayList<ItemsViewModel>("dataTest") ?: arrayListOf()
 
         return view
     }
