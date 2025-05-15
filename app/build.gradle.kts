@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-
+    implementation("io.coil-kt:coil:2.4.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
