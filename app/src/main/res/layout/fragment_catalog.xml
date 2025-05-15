@@ -1,14 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".Catalog">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Catalog Fragment" />
+        android:layout_height="65dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="66dp"
+        android:scrollbars="none">
 
-</FrameLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <android.widget.Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/shape_catalog_buttons"
+                android:fontFamily="@font/kazimir_text_regular"
+                android:padding="16dp"
+                android:text="@string/catalog_button_tours"
+                android:textAllCaps="false"
+                android:textColor="#363535"
+                android:textSize="24sp" />
+
+            <android.widget.Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/shape_catalog_buttons"
+                android:fontFamily="@font/kazimir_text_regular"
+                android:padding="16dp"
+                android:text="@string/catalog_button_excursions"
+                android:textAllCaps="false"
+                android:textColor="#363535"
+                android:textSize="24sp" />
+
+            <android.widget.Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/shape_catalog_buttons"
+                android:fontFamily="@font/kazimir_text_regular"
+                android:padding="16dp"
+                android:text="@string/catalog_button_residency"
+                android:textAllCaps="false"
+                android:textColor="#363535"
+                android:textSize="24sp" />
+
+            <android.widget.Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/shape_catalog_buttons"
+                android:fontFamily="@font/kazimir_text_regular"
+                android:padding="16dp"
+                android:text="@string/catalog_button_services"
+                android:textAllCaps="false"
+                android:textColor="#363535"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+    <Spinner
+        android:id="@+id/catalog_options_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/shape_catalog_buttons" />
+
+
+</LinearLayout>
