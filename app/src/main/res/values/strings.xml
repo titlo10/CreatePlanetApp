@@ -5,4 +5,6 @@
     <string name="bottom_favorites">Избранное</string>
     <string name="bottom_orders">Заказы</string>
     <string name="order_details">Детали заказа</string>
+
+    <string name="favorites_details">Подробнее</string>
 </resources>
