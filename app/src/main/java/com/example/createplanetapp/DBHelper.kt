@@ -66,7 +66,7 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         val cursorTable : Cursor = db.rawQuery("""
             SELECT * FROM $TABLE_NAME
             WHERE $FAVORITE_STATUS = $fStatus
-            OR $ORDERED_STATUS = $oStatus
+            AND $ORDERED_STATUS = $oStatus
         """.trimIndent(), null)
 
         cursorTable.use { cursor ->
