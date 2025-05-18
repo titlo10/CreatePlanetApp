@@ -19,6 +19,7 @@
             android:orientation="horizontal">
 
             <android.widget.Button
+                android:id="@+id/tours_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="6dp"
@@ -31,6 +32,7 @@
                 android:textSize="24sp" />
 
             <android.widget.Button
+                android:id="@+id/excursions_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="6dp"
@@ -43,6 +45,7 @@
                 android:textSize="24sp" />
 
             <android.widget.Button
+                android:id="@+id/residence_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="6dp"
@@ -55,6 +58,7 @@
                 android:textSize="24sp" />
 
             <android.widget.Button
+                android:id="@+id/services_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="6dp"
@@ -71,13 +75,51 @@
 
 
     <Spinner
-        android:id="@+id/catalog_options_spinner"
+        android:id="@+id/catalog_spinner_tours_options"
         android:layout_width="match_parent"
         android:layout_height="43dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="18dp"
         android:layout_marginEnd="12dp"
-        android:background="@drawable/shape_catalog_buttons" />
+        android:background="@drawable/shape_catalog_buttons"
+        android:visibility="visible" />
+
+    <Spinner
+        android:id="@+id/catalog_spinner_excursions_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/shape_catalog_buttons"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/catalog_spinner_residence_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/shape_catalog_buttons"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/catalog_spinner_services_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/shape_catalog_buttons"
+        android:visibility="gone" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/catalog_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="14dp"/>
 
 
 </LinearLayout>

@@ -20,7 +20,7 @@ class FavoritesAdapter(var items: List<ItemsViewModel>, val context: android.con
         val title: TextView = view.findViewById(R.id.item_in_list_favorites_title)
         val desc: TextView = view.findViewById(R.id.item_in_list_favorites_description)
         val button: Button = view.findViewById(R.id.item_in_list_favorites_button)
-        val heart: ImageView = view.findViewById(R.id.item_in_list_favorites_image)
+        val heart: ImageView = view.findViewById(R.id.item_in_list_favoritesStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoritesAdapter.MyViewHolder {
