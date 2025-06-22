@@ -30,18 +30,23 @@ class OrdersAdapter(var items: List<ItemsViewModel>, val context: android.conten
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.title.text = items[position].title
-        holder.desc.text = items[position].description
-        holder.image.load(items[position].photo[0])
+        val dbHelper = DBHelper(context, null)
+        val orderedItems = dbHelper.getRecords(items, false, true)
 
-        holder.button.setOnClickListener{
-            val intent = Intent(context, ItemActivity::class.java)
-            intent.putExtra("itemTitle", items[position].title)
-            intent.putExtra("itemDesc", items[position].description)
-            intent.putExtra("itemText", items[position].text)
-            intent.putExtra("itemPhotos", items[position].photo.toTypedArray())
-            intent.putExtra("position", position)
-            context.startActivity(intent)
+        if (items[position].title in orderedItems.map { it.title }) {
+            holder.title.text = items[position].title
+            holder.desc.text = items[position].description
+            holder.image.load(items[position].photo[0])
+
+            holder.button.setOnClickListener {
+                val intent = Intent(context, ItemActivity::class.java)
+                intent.putExtra("itemTitle", items[position].title)
+                intent.putExtra("itemDesc", items[position].description)
+                intent.putExtra("itemText", items[position].text)
+                intent.putExtra("itemPhotos", items[position].photo.toTypedArray())
+                intent.putExtra("position", position)
+                context.startActivity(intent)
+            }
         }
     }
 }
