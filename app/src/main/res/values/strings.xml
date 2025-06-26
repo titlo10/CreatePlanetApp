@@ -1,13 +1,3 @@
 <resources>
     <string name="app_name">Create Planet</string>
-    <string name="bottom_home">Главная</string>
-    <string name="bottom_catalog">Каталог</string>
-    <string name="bottom_favorites">Избранное</string>
-    <string name="bottom_orders">Заказы</string>
-    <string name="order_details">Детали заказа</string>
-    <string name="favorites_details">Подробнее</string>
-    <string name="catalog_button_tours">Туры</string>
-    <string name="catalog_button_excursions">Экскурсии</string>
-    <string name="catalog_button_residency">Проживание</string>
-    <string name="catalog_button_services">Услуги</string>
 </resources>
