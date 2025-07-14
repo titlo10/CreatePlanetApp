@@ -11,14 +11,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import com.example.createplanetapp.pages.HomePage
 import com.example.createplanetapp.pages.CatalogPage
 import com.example.createplanetapp.pages.ProfilePage
 import com.example.createplanetapp.pages.OrdersPage
 import com.example.createplanetapp.pages.FavoritesPage
+
+val kazimirRegular = FontFamily(Font(R.font.kazimir_text_regular))
+val kazimirSemibold = FontFamily(Font(R.font.kazimir_text_semibold))
+val kazimirBold = FontFamily(Font(R.font.kazimir_text_bold))
 
 @Composable
 fun MainScreen() {
@@ -30,9 +38,7 @@ fun MainScreen() {
         NavItem("Профиль", R.drawable.profile_menu_icon),
     )
 
-    var selectedIndex by remember {
-        mutableIntStateOf(0)
-    }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
