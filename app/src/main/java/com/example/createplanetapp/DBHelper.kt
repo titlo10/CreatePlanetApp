@@ -84,4 +84,19 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return favoriteItems
     }
 
+    /** Function shows is element with title $name favorite or not */
+    fun isFavorite(name: String): Boolean {
+        val db = this.readableDatabase
+
+        val cursor : Cursor = db.rawQuery("""
+            SELECT $FAVORITE_STATUS FROM $TABLE_NAME 
+            WHERE $NAME_COL = ?
+        """.trimIndent(), arrayOf(name))
+
+        return try {
+            if (cursor.moveToFirst()) cursor.getInt(0) == 1 else false
+        } finally {
+            cursor.close()
+        }
+    }
 }

@@ -2,7 +2,6 @@ package com.example.createplanetapp.pages
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -55,12 +54,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.createplanetapp.CatalogState
+import com.example.createplanetapp.DBHelper
 import com.example.createplanetapp.ItemsViewModel
 import com.example.createplanetapp.R
 import com.example.createplanetapp.csvParser
@@ -83,29 +83,39 @@ var listInDropDownMenu = toursList
 
 val listInDropDownSortMenu = listOf("По умолчанию", "По возрастанию цены", "По убыванию цены", "От А-Я", "От Я-А", "Сначала новые", "Сначала старые")
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun CatalogPage(modifier: Modifier = Modifier) {
-    var selectedButton by rememberSaveable { mutableStateOf("") }
-    var selectedOption by rememberSaveable { mutableStateOf("") }
-    var selectedSortType by rememberSaveable { mutableStateOf("По умолчанию") }
-
+fun CatalogPage(
+    modifier: Modifier = Modifier,
+    catalogState: CatalogState
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .systemBarsPadding()
             .fillMaxSize()
     ) {
-        CatalogMainButtons(selectedButton) {
-            newSelectedButton -> selectedButton = newSelectedButton
-        }
-        CatalogDropdownMenu(
-            selectedButton = selectedButton,
-            onSelectedSortTypeChange = {
-                newSelectedSortType -> selectedSortType = newSelectedSortType},
-            onSelectedOptionChange = {
-                newSelectedOption -> selectedOption = newSelectedOption }
+        CatalogMainButtons(
+            selectedButton = catalogState.selectedButton,
+            onSelectedButtonChange = { newSelectedButton ->
+                catalogState.updateState(button = newSelectedButton)
+            }
         )
-        CatalogGoodsList(selectedButton, selectedOption, selectedSortType)
+
+        CatalogDropdownMenu(
+            selectedButton = catalogState.selectedButton,
+            onSelectedSortTypeChange = { newSelectedSortType ->
+                catalogState.updateState(sortType = newSelectedSortType)
+            },
+            onSelectedOptionChange = {newSelectedOption ->
+                catalogState.updateState(option = newSelectedOption)
+            }
+        )
+
+        CatalogGoodsList(
+            catalogState = catalogState,
+            selectedButton = catalogState.selectedButton,
+            selectedOption = catalogState.selectedOption,
+            selectedSortType = catalogState.selectedSortType
+        )
     }
 }
 
@@ -196,7 +206,7 @@ private fun CatalogDropdownMenu(
 ) {
     var isExpandedMainDropDown by rememberSaveable { mutableStateOf(false) }
     var isExpandedSortDropDown by remember { mutableStateOf(false) }
-    var textInsideButton by rememberSaveable { mutableStateOf<String>("Выберите раздел")}
+    var textInsideButton by rememberSaveable { mutableStateOf("Выберите раздел")}
 
     LaunchedEffect(selectedButton) {
         textInsideButton = "Выберите раздел"
@@ -335,6 +345,7 @@ fun CatalogDropDownButton(
 
 @Composable
 private fun CatalogGoodsList(
+    catalogState: CatalogState,
     selectedButton: String,
     selectedOption: String,
     selectedSortType: String = "По умолчанию"
@@ -355,38 +366,80 @@ private fun CatalogGoodsList(
         }.sortedWith(getItemsComparator(selectedSortType))
     }
 
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        scrollState.scrollTo(catalogState.scrollState)
+    }
+
+    LaunchedEffect(scrollState.value) {
+        catalogState.updateState(
+            button = selectedButton,
+            option = selectedOption,
+            sortType = selectedSortType,
+            scroll = scrollState.value
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(ScrollState(0))
+            .verticalScroll(scrollState)
             .padding(top = 6.dp, bottom = 88.dp)
     ) {
         for(item in listToDisplay) {
             key(item.title) {
                 CatalogItem(
-                title = item.title,
-                description = item.description,
-                price = item.excursions.values.first().values.first().values.first().toString(),
-                photo = item.photo[0]
-            ) }
+                    modifier = Modifier.padding(top = 16.dp, start = 26.dp, end = 44.dp),
+                    title = item.title,
+                    description = item.description,
+                    price = item.excursions.values.first().values.first().values.first().toString(),
+                    photo = item.photo[0],
+                    mark = item.mark
+                )
+            }
         }
     }
 }
 
 
-
+/**
+ * Composable function which display one particular good on the screen.
+ *
+ * Use this in a loop through the entire list you want to display
+ *
+ * @param modifier modifier to be applied
+ * @param title good's title. Use `.title` field of this item to get it
+ * @param description good's description. Use `.description` field
+ * @param price good's lowest price. To parse nested mutable maps and find lowest value
+ *        use `.excursions.values.first().values.first().values.first().toString()`
+ * @param photo good's photo url to download. Use `.photo[0]` field
+ * @param mark string value. Could be `HIT`, `NEW`, `MUST VISIT`, `ART`, `HISTORY`, `FOR KIDS`.
+ *        Depends on "what exactly mark it is" displays corresponding image in the topLeft corner
+ * @param displayMark do you need to display any mark? By default `true` (displays marks).
+ * @param isForOrdersPage `true` if you use it in "Orders" page, otherwise `false` (by default).
+ *        If true - changing "like" icon to "Оплачено"/"Не оплачено"
+ */
 @Composable
 fun CatalogItem(
+    modifier: Modifier = Modifier,
     title: String,
     description: String,
     price: String,
-    photo: String
+    photo: String,
+    mark: String,
+    displayMark: Boolean = true,
+    isForOrdersPage: Boolean = false
 ) {
-    var checked by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val dbHelper = remember { DBHelper(context, null) }
+    var isFavorite by rememberSaveable(title) { mutableStateOf(dbHelper.isFavorite(title)) }
+
+    //var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
+     //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
 
     Box(
-        modifier = Modifier
-            .padding(top = 16.dp, start = 26.dp, end = 44.dp),
+        modifier = modifier,
         contentAlignment = Alignment.TopEnd
     ) {
         Column(
@@ -396,16 +449,36 @@ fun CatalogItem(
                     //add transfer to a good's page
                 }
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(photo),
-                //painter = painterResource(R.drawable.for_test_only),
-                contentDescription = "image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(10.dp))
-            )
+            Box(contentAlignment = Alignment.TopStart) {
+                Image(
+                    painter = rememberAsyncImagePainter(photo),
+                    //painter = painterResource(R.drawable.for_test_only),
+                    contentDescription = "image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+
+                if(displayMark &&
+                    mark in listOf("HIT", "NEW", "FOR KIDS", "MUST VISIT", "ART", "HISTORY")) {
+                    Image(
+                        painter = when(mark) {
+                            "HIT" -> painterResource(R.drawable.ic_mark_hit)
+                            "NEW" -> painterResource(R.drawable.ic_mark_new)
+                            "FOR KIDS" -> painterResource(R.drawable.ic_mark_for_kids)
+                            "HISTORY" -> painterResource(R.drawable.ic_mark_history)
+                            "ART" -> painterResource(R.drawable.ic_mark_art)
+                            else -> painterResource(R.drawable.ic_mark_must_visit)
+                        },
+                        contentDescription = "Метка экскурсии",
+                        modifier = Modifier.padding(3.dp)
+                            .size(60.dp)
+                    )
+                }
+            }
+
             Text(
                 text = title,
                 fontFamily = kazimirBold,
@@ -427,22 +500,40 @@ fun CatalogItem(
             )
         }
 
-        FilledIconToggleButton(
-            checked = checked,
-            colors = IconButtonDefaults.filledIconToggleButtonColors().copy(
-                containerColor = Color.White,
-                checkedContainerColor = Color.White
-            ),
-            onCheckedChange = {     //to do
-                checked = !checked
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Favorite,
-                contentDescription = "Избранное - добавить/удалить",
-                tint = if(checked) blueColor
-                    else mainColor
+        if(isForOrdersPage) {
+            //add check for isPaid & add text for this situation
+            Text(
+                text = "Не оплачено",
+                fontFamily = kazimirRegular,
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .padding(6.dp)
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+                color = Color(0xFFE33232)
             )
+        }
+        else {
+            FilledIconToggleButton(
+                checked = isFavorite,
+                colors = IconButtonDefaults.filledIconToggleButtonColors().copy(
+                    containerColor = Color.White,
+                    checkedContainerColor = Color.White
+                ),
+                onCheckedChange = {
+                    dbHelper.upsertRecord(title, !isFavorite, false)
+                    isFavorite = !isFavorite
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Favorite,
+                    contentDescription = "Избранное - добавить/удалить",
+                    tint = if(isFavorite) blueColor else mainColor
+                )
+            }
         }
     }
 }

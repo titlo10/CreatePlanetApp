@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -39,6 +38,7 @@ fun MainScreen() {
     )
 
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+    val catalogState = remember { CatalogState() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -61,16 +61,20 @@ fun MainScreen() {
             }
         }
     ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding), selectedIndex)
+        ContentScreen(
+            modifier = Modifier.padding(innerPadding),
+            selectedIndex = selectedIndex,
+            catalogState = catalogState
+        )
     }
 }
 
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
+fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, catalogState: CatalogState) {
     when (selectedIndex) {
         0 -> HomePage()
-        1 -> CatalogPage()
+        1 -> CatalogPage(catalogState = catalogState)
         2 -> FavoritesPage()
         3 -> OrdersPage()
         4 -> ProfilePage()
