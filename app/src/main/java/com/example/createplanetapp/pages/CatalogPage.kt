@@ -67,6 +67,7 @@ import com.example.createplanetapp.csvParser
 import com.example.createplanetapp.kazimirBold
 import com.example.createplanetapp.kazimirRegular
 import com.example.createplanetapp.kazimirSemibold
+import com.example.createplanetapp.ui.theme.LocalNavController
 import com.example.createplanetapp.ui.theme.blueColor
 import com.example.createplanetapp.ui.theme.mainColor
 
@@ -438,6 +439,8 @@ fun CatalogItem(
     //var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
      //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
 
+    val navController = LocalNavController.current
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.TopEnd
@@ -445,8 +448,8 @@ fun CatalogItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClickLabel = "Узнать подробности") {
-                    //add transfer to a good's page
+                .clickable {
+                    navController.navigate("ItemMainPage/$title")
                 }
         ) {
             Box(contentAlignment = Alignment.TopStart) {
