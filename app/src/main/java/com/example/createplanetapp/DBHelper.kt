@@ -99,4 +99,8 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
             cursor.close()
         }
     }
+
+    // TODO: добавить поле isPaid в БД
+    // TODO: fun isPaid(name: String): Boolean
+
 }
