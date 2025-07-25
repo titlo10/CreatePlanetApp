@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.createplanetapp.pages.HomePage
 import com.example.createplanetapp.pages.CatalogPage
 import com.example.createplanetapp.pages.ProfilePage
@@ -46,7 +47,7 @@ fun MainScreen(authViewModel: AuthViewModel) {
     )
 
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
-    val catalogState = remember { CatalogState() }
+    val catalogState: CatalogState = viewModel()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
