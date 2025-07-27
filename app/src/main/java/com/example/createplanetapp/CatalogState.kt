@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 
 class CatalogState {
     var selectedButton by mutableStateOf("")
-    var selectedOption by mutableStateOf("")
+    var selectedOption by mutableStateOf("Выберите раздел")
     var selectedSortType by mutableStateOf("По умолчанию")
     var scrollState by mutableStateOf(0)
 

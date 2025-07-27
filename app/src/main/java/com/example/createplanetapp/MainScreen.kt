@@ -2,9 +2,13 @@ package com.example.createplanetapp
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,21 +18,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
 import com.example.createplanetapp.pages.HomePage
 import com.example.createplanetapp.pages.CatalogPage
 import com.example.createplanetapp.pages.ProfilePage
 import com.example.createplanetapp.pages.OrdersPage
 import com.example.createplanetapp.pages.FavoritesPage
+import com.example.createplanetapp.ui.theme.blueColor
+import com.example.createplanetapp.ui.theme.lightBlueColor
 
 val kazimirRegular = FontFamily(Font(R.font.kazimir_text_regular))
 val kazimirSemibold = FontFamily(Font(R.font.kazimir_text_semibold))
 val kazimirBold = FontFamily(Font(R.font.kazimir_text_bold))
 
 @Composable
-fun MainScreen() {
+fun MainScreen(authViewModel: AuthViewModel) {
     val navItemList = listOf(
         NavItem("Главная", R.drawable.home_menu_icon),
         NavItem("Каталог", R.drawable.catalog_menu_icon),
@@ -51,11 +59,17 @@ fun MainScreen() {
                             selectedIndex = index
                         },
                         icon = {
-                            Icon(painter = painterResource(navItem.icon), contentDescription = null)
+                            Icon(painter = painterResource(navItem.icon), contentDescription = null, modifier = Modifier.size(30.dp))
                         },
-                        label = {
-                            Text(text = navItem.label)
-                        }
+//                      Disabled temporarily to see how it looks
+//                        label = {
+//                            Text(text = navItem.label)
+//                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = lightBlueColor,
+                            unselectedIconColor = blueColor,
+                            indicatorColor = Color.Transparent,
+                        ),
                     )
                 }
             }
@@ -64,19 +78,20 @@ fun MainScreen() {
         ContentScreen(
             modifier = Modifier.padding(innerPadding),
             selectedIndex = selectedIndex,
-            catalogState = catalogState
+            catalogState = catalogState,
+            authViewModel = authViewModel
         )
     }
 }
 
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, catalogState: CatalogState) {
+fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, catalogState: CatalogState, authViewModel: AuthViewModel) {
     when (selectedIndex) {
         0 -> HomePage()
         1 -> CatalogPage(catalogState = catalogState)
         2 -> FavoritesPage()
         3 -> OrdersPage()
-        4 -> ProfilePage()
+        4 -> ProfilePage(authViewModel = authViewModel)
     }
 }
