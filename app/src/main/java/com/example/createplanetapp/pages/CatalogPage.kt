@@ -143,7 +143,7 @@ private fun CatalogMainButtons(
                 text = element,
                 isSelected = (selectedButton == element),
                 modifier = if(element == "Туры") Modifier.padding(start = 12.dp, end = 6.dp)
-                        else Modifier.padding(end = 6.dp)
+                else Modifier.padding(end = 6.dp)
             )
         }
     }
@@ -229,7 +229,7 @@ private fun CatalogDropdownMenu(
                     contentDescription = "Сортировка",
                     modifier = Modifier.size(24.dp),
                     tint = if(isExpandedSortDropDown || selectedSortType != "По умолчанию") mainColor
-                        else Color(0xFFA3A3A3)
+                    else Color(0xFFA3A3A3)
                 )
             }
         }
@@ -392,7 +392,7 @@ private fun CatalogGoodsList(
                 key(item.title) {
                     CatalogItem(
                         modifier = if(item == listToDisplay[0]) Modifier.padding(start = 26.dp, end = 26.dp)
-                            else Modifier.padding(top = 16.dp, start = 26.dp, end = 26.dp),
+                        else Modifier.padding(top = 16.dp, start = 26.dp, end = 26.dp),
                         title = item.title,
                         description = item.description,
                         price = item.excursions.values.first().values.first().values.first().toString(),
@@ -438,8 +438,9 @@ fun CatalogItem(
     val dbHelper = remember { DBHelper(context, null) }
     var isFavorite by rememberSaveable(title) { mutableStateOf(dbHelper.isFavorite(title)) }
 
-     // var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
-     //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
+    // var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
+    //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
+
 
     val navController = LocalNavController.current
 
@@ -501,7 +502,7 @@ fun CatalogItem(
                 fontFamily = kazimirRegular,
                 fontSize = 14.sp,
                 modifier = if (description == "") Modifier.padding(start = 5.dp, bottom = 4.dp)
-                    else Modifier.padding(top = 16.dp, start = 5.dp, bottom = 4.dp)
+                else Modifier.padding(top = 16.dp, start = 5.dp, bottom = 4.dp)
             )
         }
 
