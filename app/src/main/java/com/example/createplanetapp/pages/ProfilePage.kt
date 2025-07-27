@@ -1,31 +1,44 @@
 package com.example.createplanetapp.pages
 
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import com.example.createplanetapp.R
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.createplanetapp.AuthState
+import com.example.createplanetapp.AuthViewModel
 
 @Composable
-fun ProfilePage(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+fun ProfilePage(authViewModel: AuthViewModel) {
+    val navController = rememberNavController()
+
+    val authState = authViewModel.authState.observeAsState()
+
+    val startDestination = when (authState.value) {
+        is AuthState.Authenticated -> "userProfile"
+        else -> "login"
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
     ) {
-        Text(
-            text = "Profile Page",
-            fontSize = 42.sp,
-            fontFamily = FontFamily(Font(R.font.kazimir_text_regular)),
-            color = Color.Black
-        )
+        composable("login") {
+            LoginPage(navController, authViewModel)
+        }
+        composable("register") {
+            RegisterPage(navController, authViewModel)
+        }
+        composable("userProfile") {
+            UserProfilePage(navController, authViewModel)
+        }
     }
 }
+
+
