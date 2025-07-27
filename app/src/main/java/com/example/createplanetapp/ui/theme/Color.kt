@@ -15,3 +15,5 @@ val mainColor = Color(0xFF363535)
 
 /** color for every blue element in our app */
 val blueColor = Color(0xFF2899C9)
+val lightBlueColor = Color(0xFF63CEFF)
+val transparentBlack = Color(0x1A000000)

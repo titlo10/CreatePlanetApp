@@ -12,10 +12,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.createplanetapp.pages.ItemMainPage
 import com.example.createplanetapp.ui.theme.LocalNavController
+import com.google.firebase.FirebaseApp
+import androidx.activity.viewModels
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val authViewModel : AuthViewModel by viewModels()
+        FirebaseApp.initializeApp(this)
         Thread.sleep(2000)
         installSplashScreen()
         GlobalData.initialize(this)
@@ -27,7 +31,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 NavHost(navController = navController, startDestination = "Main_Screen") {
                     composable("Main_Screen") {
-                        MainScreen()
+                        MainScreen(authViewModel)
                     }
                     composable(
                         "ItemMainPage/{title}",
