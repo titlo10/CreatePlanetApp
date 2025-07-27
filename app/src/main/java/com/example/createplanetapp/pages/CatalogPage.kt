@@ -97,12 +97,13 @@ fun CatalogPage(
         CatalogMainButtons(
             selectedButton = catalogState.selectedButton,
             onSelectedButtonChange = { newSelectedButton ->
-                catalogState.updateState(button = newSelectedButton)
+                catalogState.updateState(button = newSelectedButton, option = "Выберите раздел")
             }
         )
 
         CatalogDropdownMenu(
-            selectedButton = catalogState.selectedButton,
+            selectedOption = catalogState.selectedOption,
+            selectedSortType = catalogState.selectedSortType,
             onSelectedSortTypeChange = { newSelectedSortType ->
                 catalogState.updateState(sortType = newSelectedSortType)
             },
@@ -111,12 +112,7 @@ fun CatalogPage(
             }
         )
 
-        CatalogGoodsList(
-            catalogState = catalogState,
-            selectedButton = catalogState.selectedButton,
-            selectedOption = catalogState.selectedOption,
-            selectedSortType = catalogState.selectedSortType
-        )
+        CatalogGoodsList(catalogState = catalogState)
     }
 }
 
@@ -147,7 +143,7 @@ private fun CatalogMainButtons(
                 text = element,
                 isSelected = (selectedButton == element),
                 modifier = if(element == "Туры") Modifier.padding(start = 12.dp, end = 6.dp)
-                        else Modifier.padding(end = 6.dp)
+                else Modifier.padding(end = 6.dp)
             )
         }
     }
@@ -201,17 +197,13 @@ fun CatalogButton(
 
 @Composable
 private fun CatalogDropdownMenu(
-    selectedButton : String,
+    selectedOption: String,
+    selectedSortType: String,
     onSelectedSortTypeChange: (String) -> Unit,
     onSelectedOptionChange: (String) -> Unit
 ) {
     var isExpandedMainDropDown by rememberSaveable { mutableStateOf(false) }
     var isExpandedSortDropDown by remember { mutableStateOf(false) }
-    var textInsideButton by rememberSaveable { mutableStateOf("Выберите раздел")}
-
-    LaunchedEffect(selectedButton) {
-        textInsideButton = "Выберите раздел"
-    }
 
     Column {
         Row(
@@ -224,7 +216,7 @@ private fun CatalogDropdownMenu(
             CatalogDropDownButton(
                 onClick = { isExpandedMainDropDown = true },
                 modifier = Modifier.weight(1f),
-                text = textInsideButton,
+                text = selectedOption,
                 isExpanded = isExpandedMainDropDown
             )
 
@@ -236,8 +228,8 @@ private fun CatalogDropdownMenu(
                     painter = painterResource(R.drawable.ic_catalog_sort),
                     contentDescription = "Сортировка",
                     modifier = Modifier.size(24.dp),
-                    tint = if(isExpandedSortDropDown) mainColor
-                        else Color(0xFFA3A3A3)
+                    tint = if(isExpandedSortDropDown || selectedSortType != "По умолчанию") mainColor
+                    else Color(0xFFA3A3A3)
                 )
             }
         }
@@ -256,7 +248,6 @@ private fun CatalogDropdownMenu(
             for(element in listInDropDownMenu) {
                 DropdownMenuItem(
                     onClick = {
-                        textInsideButton = element
                         onSelectedOptionChange(element)
                         isExpandedMainDropDown = false
                     },
@@ -275,6 +266,7 @@ private fun CatalogDropdownMenu(
 
         //Выпадающий список сортировки
         DropdownMenu(
+            // TODO: внешний вид списка сортировки?
             expanded = isExpandedSortDropDown,
             onDismissRequest = { isExpandedSortDropDown = false },
             modifier = Modifier
@@ -295,7 +287,7 @@ private fun CatalogDropdownMenu(
                         Text(
                             text = element,
                             fontSize = 14.sp,
-                            fontFamily = kazimirRegular,
+                            fontFamily = if (element == selectedSortType) kazimirSemibold else kazimirRegular,
                             textDecoration = TextDecoration.Underline,
                             color = sortDropDownColor
                         )
@@ -346,58 +338,68 @@ fun CatalogDropDownButton(
 
 @Composable
 private fun CatalogGoodsList(
-    catalogState: CatalogState,
-    selectedButton: String,
-    selectedOption: String,
-    selectedSortType: String = "По умолчанию"
+    catalogState: CatalogState
 ) {
     val context = LocalContext.current
 
     val itemsPoGorodu = remember { csvParser(context.resources, R.raw.po_gorodu) }
     val itemsZagorodnie = remember { csvParser(context.resources, R.raw.zagorodnie) }
 
-    val listToDisplay = remember (selectedButton, selectedOption, selectedSortType) {
-        when (selectedButton) {
-            "Экскурсии" -> when (selectedOption) {
+    var previousOption by remember { mutableStateOf(catalogState.selectedOption) }
+    var shouldRestoreScroll by remember { mutableStateOf(true) }
+
+    val listToDisplay = remember (catalogState.selectedButton, catalogState.selectedOption, catalogState.selectedSortType) {
+        when (catalogState.selectedButton) {
+            "Экскурсии" -> when (catalogState.selectedOption) {
                 "По городу" -> itemsPoGorodu
                 "Загородные" -> itemsZagorodnie
                 else -> emptyList()
             }
             else -> emptyList()
-        }.sortedWith(getItemsComparator(selectedSortType))
+        }.sortedWith(getItemsComparator(catalogState.selectedSortType))
     }
 
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(Unit) {
-        scrollState.scrollTo(catalogState.scrollState)
+    LaunchedEffect(catalogState.selectedOption) {
+        if (catalogState.selectedOption != previousOption) {
+            scrollState.scrollTo(0)
+            previousOption = catalogState.selectedOption
+            shouldRestoreScroll = false
+        } else if (shouldRestoreScroll) {
+            scrollState.scrollTo(catalogState.scrollState)
+            shouldRestoreScroll = false
+        }
     }
 
     LaunchedEffect(scrollState.value) {
-        catalogState.updateState(
-            button = selectedButton,
-            option = selectedOption,
-            sortType = selectedSortType,
-            scroll = scrollState.value
-        )
+        if (!shouldRestoreScroll) {
+            catalogState.updateState(scroll = scrollState.value)
+        }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(top = 6.dp, bottom = 88.dp)
+            .padding(top = 16.dp, bottom = 88.dp)
     ) {
-        for(item in listToDisplay) {
-            key(item.title) {
-                CatalogItem(
-                    modifier = Modifier.padding(top = 16.dp, start = 26.dp, end = 44.dp),
-                    title = item.title,
-                    description = item.description,
-                    price = item.excursions.values.first().values.first().values.first().toString(),
-                    photo = item.photo[0],
-                    mark = item.mark
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+        ) {
+            for(item in listToDisplay) {
+                key(item.title) {
+                    CatalogItem(
+                        modifier = if(item == listToDisplay[0]) Modifier.padding(start = 26.dp, end = 26.dp)
+                        else Modifier.padding(top = 16.dp, start = 26.dp, end = 26.dp),
+                        title = item.title,
+                        description = item.description,
+                        price = item.excursions.values.first().values.first().values.first().toString(),
+                        photo = item.photo[0],
+                        mark = item.mark
+                    )
+                }
             }
         }
     }
@@ -436,8 +438,8 @@ fun CatalogItem(
     val dbHelper = remember { DBHelper(context, null) }
     var isFavorite by rememberSaveable(title) { mutableStateOf(dbHelper.isFavorite(title)) }
 
-    //var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
-     //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
+    // var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
+    //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
 
     val navController = LocalNavController.current
 
@@ -448,7 +450,7 @@ fun CatalogItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
+                .clickable(onClickLabel = "Узнать подробности") {
                     navController.navigate("ItemMainPage/$title")
                 }
         ) {
@@ -499,12 +501,12 @@ fun CatalogItem(
                 fontFamily = kazimirRegular,
                 fontSize = 14.sp,
                 modifier = if (description == "") Modifier.padding(start = 5.dp, bottom = 4.dp)
-                    else Modifier.padding(top = 16.dp, start = 5.dp, bottom = 4.dp)
+                else Modifier.padding(top = 16.dp, start = 5.dp, bottom = 4.dp)
             )
         }
 
         if(isForOrdersPage) {
-            //add check for isPaid & add text for this situation
+            // TODO: add check for isPaid & add text for this situation
             Text(
                 text = "Не оплачено",
                 fontFamily = kazimirRegular,
