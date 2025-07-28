@@ -116,11 +116,12 @@ fun FavoriteItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
-            .clickable {
+    ) {
+        Column (
+            modifier = Modifier.clickable{
                 navController.navigate("ItemMainPage/${item.title}")
             }
-    ) {
-        Column {
+        ){
             Box(contentAlignment = Alignment.TopStart) {
                 Image(
                     painter = rememberAsyncImagePainter(item.photo[0]),
