@@ -17,6 +17,10 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         const val NAME_COL = "name"
         const val FAVORITE_STATUS = "fStatus"
         const val ORDERED_STATUS = "oStatus"
+
+        // Статусы как строки
+        const val STATUS_TRUE = "true"
+        const val STATUS_FALSE = "false"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -24,8 +28,8 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
             CREATE TABLE $TABLE_NAME (
                 $ID_COL INTEGER PRIMARY KEY AUTOINCREMENT,
                 $NAME_COL TEXT UNIQUE,
-                $FAVORITE_STATUS BOOLEAN,
-                $ORDERED_STATUS BOOLEAN
+                $FAVORITE_STATUS TEXT,
+                $ORDERED_STATUS TEXT
             )
         """.trimIndent()
         db.execSQL(query)
@@ -37,7 +41,7 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     }
 
     /** Function updates record if that exists else inserts new */
-    fun upsertRecord(name: String, fStatus: Boolean, oStatus: Boolean) {
+    fun upsertRecord(name: String, fStatus: String, oStatus: String) {
         val values = ContentValues().apply {
             put(NAME_COL, name)
             put(FAVORITE_STATUS, fStatus)
@@ -54,19 +58,18 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
 
     /**
      * Function searches for favorite or ordered matching depends on what you specify
-     * @param fStatus
-     * @param oStatus
-     * Use them to specify the field or fields need to search
+     * @param fStatus - строка ("true" или "false")
+     * @param oStatus - строка ("true" или "false")
      */
-    fun getRecords(items: List<ItemsViewModel>, fStatus: Boolean, oStatus: Boolean) : ArrayList<ItemsViewModel> {
+    fun getRecords(items: List<ItemsViewModel>, fStatus: String, oStatus: String) : ArrayList<ItemsViewModel> {
         val db = this.readableDatabase
 
         val favoriteItems = ArrayList<ItemsViewModel>()
 
         val cursorTable : Cursor = db.rawQuery("""
             SELECT * FROM $TABLE_NAME
-            WHERE $FAVORITE_STATUS = $fStatus
-            AND $ORDERED_STATUS = $oStatus
+            WHERE $FAVORITE_STATUS = '$fStatus'
+            AND $ORDERED_STATUS = '$oStatus'
         """.trimIndent(), null)
 
         cursorTable.use { cursor ->
@@ -94,13 +97,25 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         """.trimIndent(), arrayOf(name))
 
         return try {
-            if (cursor.moveToFirst()) cursor.getInt(0) == 1 else false
+            if (cursor.moveToFirst()) cursor.getString(0) == STATUS_TRUE else false
         } finally {
             cursor.close()
         }
     }
 
-    // TODO: добавить поле isPaid в БД
-    // TODO: fun isPaid(name: String): Boolean
+    /** Function shows is element with title $name ordered or not */
+    fun isOrdered(name: String): Boolean {
+        val db = this.readableDatabase
 
+        val cursor : Cursor = db.rawQuery("""
+            SELECT $ORDERED_STATUS FROM $TABLE_NAME 
+            WHERE $NAME_COL = ?
+        """.trimIndent(), arrayOf(name))
+
+        return try {
+            if (cursor.moveToFirst()) cursor.getString(0) == STATUS_TRUE else false
+        } finally {
+            cursor.close()
+        }
+    }
 }

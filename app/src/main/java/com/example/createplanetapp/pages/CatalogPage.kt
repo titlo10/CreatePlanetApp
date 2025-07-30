@@ -530,7 +530,7 @@ fun CatalogItem(
                     checkedContainerColor = Color.White
                 ),
                 onCheckedChange = {
-                    dbHelper.upsertRecord(title, !isFavorite, false)
+                    dbHelper.upsertRecord(title, (!isFavorite).toString(), "false")
                     isFavorite = !isFavorite
                 }
             ) {
