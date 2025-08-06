@@ -178,7 +178,7 @@ fun FavoriteItem(
                 checkedContainerColor = Color.White
             ),
             onCheckedChange = {
-                dbHelper.upsertRecord(item.title, "false", "false")
+                dbHelper.setFavoriteStatus(item.title, "false")
                 onFavoriteChanged()
             },
             modifier = Modifier.align(Alignment.TopEnd)

@@ -40,20 +40,52 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         onCreate(db)
     }
 
-    /** Function updates record if that exists else inserts new */
-    fun upsertRecord(name: String, fStatus: String, oStatus: String) {
+    /** Sets favorite status for the record with specified name, creates a record if it doesn't exist */
+    fun setFavoriteStatus(name: String, fStatus: String) {
+        val db = writableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $NAME_COL = '$name'", null)
+
         val values = ContentValues().apply {
             put(NAME_COL, name)
             put(FAVORITE_STATUS, fStatus)
+        }
+
+        cursor.use {
+            if (it.moveToFirst()) {
+                db.update(
+                    TABLE_NAME,
+                    values,
+                    "$NAME_COL = '$name'", null
+                )
+            } else {
+                values.put(ORDERED_STATUS, STATUS_FALSE)
+                db.insert(TABLE_NAME, null, values)
+            }
+        }
+    }
+
+    /** Sets ordered status for the record with specified name, creates a record if it doesn't exist */
+    fun setOrderedStatus(name: String, oStatus: String) {
+        val db = writableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $NAME_COL = '$name'", null)
+
+        val values = ContentValues().apply {
+            put(NAME_COL, name)
             put(ORDERED_STATUS, oStatus)
         }
 
-        writableDatabase.insertWithOnConflict(
-            TABLE_NAME,
-            null,
-            values,
-            SQLiteDatabase.CONFLICT_REPLACE
-        )
+        cursor.use {
+            if (it.moveToFirst()) {
+                db.update(
+                    TABLE_NAME,
+                    values,
+                    "$NAME_COL = '$name'", null
+                )
+            } else {
+                values.put(FAVORITE_STATUS, STATUS_FALSE)
+                db.insert(TABLE_NAME, null, values)
+            }
+        }
     }
 
     /**

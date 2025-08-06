@@ -273,7 +273,7 @@ fun CatalogItem(
                         ),
                         modifier = Modifier.padding(8.dp),
                         onCheckedChange = {
-                            dbHelper.upsertRecord(title, (!isFavorite).toString(), "false")
+                            dbHelper.setFavoriteStatus(title, (!isFavorite).toString())
                             isFavorite = !isFavorite
                         }
                     ) {
