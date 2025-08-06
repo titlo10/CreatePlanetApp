@@ -62,10 +62,6 @@ fun MainScreen(authViewModel: AuthViewModel) {
                         icon = {
                             Icon(painter = painterResource(navItem.icon), contentDescription = null, modifier = Modifier.size(30.dp))
                         },
-//                      Disabled temporarily to see how it looks
-//                        label = {
-//                            Text(text = navItem.label)
-//                        },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = lightBlueColor,
                             unselectedIconColor = blueColor,
