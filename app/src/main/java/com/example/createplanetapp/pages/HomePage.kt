@@ -40,6 +40,7 @@ import androidx.compose.foundation.background
 import com.example.createplanetapp.ui.theme.blueColor
 import com.example.createplanetapp.ui.theme.mainColor
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.ui.BiasAbsoluteAlignment
 
 @Composable
 fun HomePage() {
@@ -272,7 +273,7 @@ fun CatalogItem(
                         ),
                         modifier = Modifier.padding(8.dp),
                         onCheckedChange = {
-                            dbHelper.upsertRecord(title, !isFavorite, false)
+                            dbHelper.upsertRecord(title, (!isFavorite).toString(), "false")
                             isFavorite = !isFavorite
                         }
                     ) {

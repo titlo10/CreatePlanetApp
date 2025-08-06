@@ -57,7 +57,7 @@ fun FavoritesPage(
         val itemsZagorodnie = csvParser(context.resources, R.raw.zagorodnie)
         val allItems = itemsPoGorodu + itemsZagorodnie
 
-        favoriteItems = dbHelper.getRecords(allItems, true, false)
+        favoriteItems = dbHelper.getRecords(allItems, "true", "false")
     }
 
     loadFavorites()
@@ -178,7 +178,7 @@ fun FavoriteItem(
                 checkedContainerColor = Color.White
             ),
             onCheckedChange = {
-                dbHelper.upsertRecord(item.title, false, false)
+                dbHelper.upsertRecord(item.title, "false", "false")
                 onFavoriteChanged()
             },
             modifier = Modifier.align(Alignment.TopEnd)
