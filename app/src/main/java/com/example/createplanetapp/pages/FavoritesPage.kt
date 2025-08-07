@@ -43,6 +43,7 @@ import com.example.createplanetapp.kazimirSemibold
 import com.example.createplanetapp.ui.theme.LocalNavController
 import com.example.createplanetapp.ui.theme.blueColor
 import com.example.createplanetapp.ui.theme.mainColor
+import kotlin.collections.plus
 
 @Composable
 fun FavoritesPage(
@@ -58,6 +59,7 @@ fun FavoritesPage(
         val allItems = itemsPoGorodu + itemsZagorodnie
 
         favoriteItems = dbHelper.getRecords(allItems, "true", "false")
+        favoriteItems += dbHelper.getRecords(allItems, "true", "true")
     }
 
     loadFavorites()

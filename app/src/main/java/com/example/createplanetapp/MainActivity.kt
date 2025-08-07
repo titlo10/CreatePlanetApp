@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     ) { backStackEntry ->
                         val title = backStackEntry.arguments?.getString("title")!!
                         ItemMainPage(title) {
-                            navController.popBackStack()
+                            navController.navigateUp()
                         }
                     }
                 }
