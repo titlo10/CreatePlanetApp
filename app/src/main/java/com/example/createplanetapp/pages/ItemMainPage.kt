@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +28,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,14 +55,17 @@ import com.example.createplanetapp.kazimirSemibold
 import com.example.createplanetapp.ui.theme.blueColor
 import com.example.createplanetapp.ui.theme.mainColor
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemMainPage(title: String, onClick: () -> Unit) {
     val item: ItemsViewModel = GlobalData.items
-        .flatten()
         .first { it.title == title }
 
     val context = LocalContext.current
     val dbHelper = remember { DBHelper(context, null) }
+
+    val bottomSheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     var isTextExpanded by remember { mutableStateOf(false) }
     var isWayExpanded by remember { mutableStateOf(false) }
@@ -92,6 +98,64 @@ fun ItemMainPage(title: String, onClick: () -> Unit) {
     }
 
     /*ЗАНОВО ПЕРЕДЕЛАТЬ ДИНАМИЧЕСКОЕ ИЗМЕНЕНИЕ ЦЕНЫ*/
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Бронирование",
+                    fontFamily = kazimirBold,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text("""1
+                    |2
+                    |3
+                    |4
+                    |5
+                    |6
+                    |7
+                    |8
+                    |9
+                    |10
+                    |
+                """.trimMargin())
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        dbHelper.setOrderedStatus(item.title, "true")
+                        Toast.makeText(context, "Бронь оформлена!", Toast.LENGTH_LONG).show()
+                    },
+                    modifier = Modifier
+                        .padding(top = 5.dp)
+                        .height(33.dp)
+                        .width(150.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = blueColor,
+                        disabledContentColor = mainColor
+                    )
+                ) {
+                    Text(
+                        text = "Оплатить",
+                        fontSize = 14.sp,
+                        fontFamily = kazimirRegular,
+                        color = Color.White
+                    )
+                }
+
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -266,10 +330,7 @@ fun ItemMainPage(title: String, onClick: () -> Unit) {
             //Booking button
             Box(modifier = Modifier.fillMaxSize()) {
                 Button(
-                    onClick = {
-                        dbHelper.setOrderedStatus(title, "true")
-                        Toast.makeText(context, "Бронь оформлена!", Toast.LENGTH_LONG).show()
-                              },
+                    onClick = { showBottomSheet = true },
                     modifier = Modifier
                         .padding(start = 16.dp, top = 20.dp, bottom = 30.dp)
                         .align(Alignment.BottomCenter),
