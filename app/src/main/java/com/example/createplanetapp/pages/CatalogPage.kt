@@ -441,7 +441,6 @@ fun CatalogItem(
     // var isPaid by rememberSaveable(title) { mutableStateOf(dbHelper.isPaid(title)) }
     //в бд добавить поле Оплачено/Не оплачено + функцию на проверку этого поля по аналогии с isFavorite
 
-
     val navController = LocalNavController.current
 
     Box(

@@ -93,15 +93,15 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
      * @param fStatus - строка ("true" или "false")
      * @param oStatus - строка ("true" или "false")
      */
-    fun getRecords(items: List<ItemsViewModel>, fStatus: String, oStatus: String) : ArrayList<ItemsViewModel> {
+    /* Function searches for favorite matching */
+    fun getFavoriteRecords(items: List<ItemsViewModel>) : ArrayList<ItemsViewModel> {
         val db = this.readableDatabase
 
         val favoriteItems = ArrayList<ItemsViewModel>()
 
         val cursorTable : Cursor = db.rawQuery("""
             SELECT * FROM $TABLE_NAME
-            WHERE $FAVORITE_STATUS = '$fStatus'
-            AND $ORDERED_STATUS = '$oStatus'
+            WHERE $FAVORITE_STATUS = 'true'
         """.trimIndent(), null)
 
         cursorTable.use { cursor ->
@@ -117,6 +117,32 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
 
         return favoriteItems
+    }
+
+    /* Function searches for ordered matching */
+    fun getOrderedRecords(items: List<ItemsViewModel>) : ArrayList<ItemsViewModel> {
+        val db = this.readableDatabase
+
+        val orderedItems = ArrayList<ItemsViewModel>()
+
+        val cursorTable : Cursor = db.rawQuery("""
+            SELECT * FROM $TABLE_NAME
+            WHERE $ORDERED_STATUS = 'true'
+        """.trimIndent(), null)
+
+        cursorTable.use { cursor ->
+            if (cursor.moveToFirst()) {
+                do {
+                    items.forEach {
+                        if(it.title == cursor.getString(1)) {
+                            orderedItems.add(it)
+                        }
+                    }
+                } while(cursor.moveToNext())
+            }
+        }
+
+        return orderedItems
     }
 
     /** Function shows is element with title $name favorite or not */

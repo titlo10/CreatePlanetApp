@@ -27,15 +27,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +54,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.createplanetapp.AuthState
+import com.example.createplanetapp.AuthViewModel
 import com.example.createplanetapp.DBHelper
 import com.example.createplanetapp.GlobalData
 import com.example.createplanetapp.ItemsViewModel
@@ -61,21 +69,25 @@ import com.example.createplanetapp.ui.theme.blueColor
 import com.example.createplanetapp.ui.theme.mainColor
 
 @Composable
-fun OrdersPage(modifier: Modifier = Modifier) {
+fun OrdersPage(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel
+) {
     val context = LocalContext.current
     val dbHelper = remember { DBHelper(context, null) }
+    val authState = authViewModel.authState.observeAsState()
+
     var orderedItems by remember { mutableStateOf<List<ItemsViewModel>>(emptyList()) }
 
-    fun loadOrders() {
-        val itemsPoGorodu = csvParser(context.resources, R.raw.po_gorodu)
-        val itemsZagorodnie = csvParser(context.resources, R.raw.zagorodnie)
-        val allItems = itemsPoGorodu + itemsZagorodnie
+//    LaunchedEffect(authState.value) {
+//        when(authState.value){
+//            is AuthState.Authenticated -> get data from remote DB
+//            is AuthState.Unauthenticated -> get data from build-in DB
+//            else -> Unit
+//        }
+//    }
 
-        orderedItems = dbHelper.getRecords(allItems, "false", "true")
-        orderedItems += dbHelper.getRecords(allItems, "true", "true")
-    }
-
-    loadOrders()
+    orderedItems = dbHelper.getOrderedRecords(GlobalData.items)
 
     Column(
         modifier = modifier
@@ -110,7 +122,7 @@ fun OrdersPage(modifier: Modifier = Modifier) {
                     items(orderedItems) { item ->
                         OrdersItem(
                             item = item,
-                            onOrderedChanged = { loadOrders() }
+                            onOrderedChanged = { orderedItems = dbHelper.getOrderedRecords(GlobalData.items) }
                         )
                     }
                 }
@@ -118,7 +130,7 @@ fun OrdersPage(modifier: Modifier = Modifier) {
         }
     }
 }
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersItem(
     item: ItemsViewModel,
@@ -128,16 +140,68 @@ fun OrdersItem(
     val context = LocalContext.current
     val dbHelper = remember { DBHelper(context, null) }
 
+    val bottomSheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    //Шторка для отображения деталей заказа
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Детали заказа",
+                    fontFamily = kazimirBold,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text("Здесь будет список деталей заказа")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            dbHelper.setOrderedStatus(item.title, "false")
+                            onOrderedChanged()
+                            Toast.makeText(context, "Бронь снята!", Toast.LENGTH_LONG).show()
+                        },
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .height(33.dp)
+                            .width(150.dp)
+                            .align(Alignment.CenterHorizontally),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = blueColor,
+                            disabledContentColor = mainColor
+                        )
+                    ) {
+                        Text(
+                            text = "Снять бронь",
+                            fontSize = 14.sp,
+                            fontFamily = kazimirRegular,
+                            color = Color.White
+                        )
+                    }
+
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
         Column (
-            modifier = Modifier.clickable{
+            modifier = Modifier.clickable {
                 navController.navigate("ItemMainPage/${item.title}")
             }
-        ){
+        ) {
             Box(contentAlignment = Alignment.TopStart) {
                 Image(
                     painter = rememberAsyncImagePainter(item.photo[0]),
@@ -162,22 +226,20 @@ fun OrdersItem(
                         contentDescription = "Метка экскурсии",
                         modifier = Modifier
                             .padding(3.dp)
-                            .size(60.dp)
-                    )
+                            .size(60.dp))
                 }
             }
             Text(
                 text = item.title,
                 fontFamily = kazimirBold,
                 fontSize = 14.sp,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+                modifier = Modifier.padding(top = 8.dp))
             Text(
                 text = item.description,
                 fontFamily = kazimirRegular,
                 fontSize = 14.sp,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+                modifier = Modifier.padding(top = 4.dp))
+
             Row {
                 Text(
                     text = "от ${item.excursions.values.first().values.first().values.first()} р.",
@@ -191,11 +253,7 @@ fun OrdersItem(
                     contentAlignment = Alignment.TopEnd
                 ) {
                     Button(
-                        onClick = {
-                            dbHelper.setOrderedStatus(item.title, "false")
-                            onOrderedChanged()
-                            Toast.makeText(context, "Бронь снята!", Toast.LENGTH_LONG).show()
-                                  },
+                        onClick = { showBottomSheet = true }, // Показываем шторку
                         modifier = Modifier
                             .padding(top = 5.dp)
                             .height(33.dp)
@@ -206,7 +264,7 @@ fun OrdersItem(
                         )
                     ) {
                         Text(
-                            text = "Снять бронь",
+                            text = "Детали заказа",
                             fontSize = 14.sp,
                             fontFamily = kazimirRegular,
                             color = Color.White

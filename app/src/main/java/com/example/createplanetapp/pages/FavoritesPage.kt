@@ -1,5 +1,6 @@
 package com.example.createplanetapp.pages
 
+import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -33,7 +34,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.createplanetapp.AuthViewModel
 import com.example.createplanetapp.DBHelper
+import com.example.createplanetapp.GlobalData
 import com.example.createplanetapp.ItemsViewModel
 import com.example.createplanetapp.R
 import com.example.createplanetapp.csvParser
@@ -47,22 +50,14 @@ import kotlin.collections.plus
 
 @Composable
 fun FavoritesPage(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel
 ) {
     val context = LocalContext.current
     val dbHelper = remember { DBHelper(context, null) }
     var favoriteItems by remember { mutableStateOf<List<ItemsViewModel>>(emptyList()) }
 
-    fun loadFavorites() {
-        val itemsPoGorodu = csvParser(context.resources, R.raw.po_gorodu)
-        val itemsZagorodnie = csvParser(context.resources, R.raw.zagorodnie)
-        val allItems = itemsPoGorodu + itemsZagorodnie
-
-        favoriteItems = dbHelper.getRecords(allItems, "true", "false")
-        favoriteItems += dbHelper.getRecords(allItems, "true", "true")
-    }
-
-    loadFavorites()
+    favoriteItems = dbHelper.getFavoriteRecords(GlobalData.items)
 
     Column(
         modifier = modifier
@@ -96,7 +91,7 @@ fun FavoritesPage(
                     items(favoriteItems) { item ->
                         FavoriteItem(
                             item = item,
-                            onFavoriteChanged = { loadFavorites() }
+                            onFavoriteChanged = { favoriteItems = dbHelper.getFavoriteRecords(GlobalData.items) }
                         )
                     }
                 }

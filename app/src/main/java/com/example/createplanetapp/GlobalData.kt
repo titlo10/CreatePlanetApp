@@ -3,21 +3,16 @@ package com.example.createplanetapp
 import android.content.Context
 
 /**
- * USAGE:
+ * This class contains all parsed items from R.raw.* in `ArrayList<ItemViewModel>` data type
  *
- *   val `<name>` = GlobalData.items`[<index>]`
+ * `GlobalData.initialize` - initial parsing
  *
- *   `<name>` - your own name for variable which would be in use
- *
- *   `<index>` should be chose if needed:
-- default: list of all excursions, no boundaries by type
-- 0: po_gorodu.csv
-- 1: zagorodnie.csv
+ * `GlobalData.items` - returns all items
  */
 object GlobalData {
-    private var _items: List<ArrayList<ItemsViewModel>>? = null  // Item — ваша модель данных
+    private var _items: ArrayList<ItemsViewModel>? = null  // Item — ваша модель данных
 
-    val items: List<ArrayList<ItemsViewModel>>
+    val items: ArrayList<ItemsViewModel>
         get() = _items ?: throw IllegalStateException("Данные не загружены. Вызовите GlobalData.initialize()")
 
     fun initialize(context: Context) {
@@ -25,10 +20,10 @@ object GlobalData {
             _items = parseCsv(context)
         }
     }
-    private fun parseCsv(context: Context): List<ArrayList<ItemsViewModel>> {
-        val items = mutableListOf<ArrayList<ItemsViewModel>>()
-        items.add(csvParser(context.resources, R.raw.po_gorodu))
-        items.add(csvParser(context.resources, R.raw.zagorodnie))
+    private fun parseCsv(context: Context): ArrayList<ItemsViewModel> {
+        val items = ArrayList<ItemsViewModel>()
+        items += csvParser(context.resources, R.raw.po_gorodu)
+        items += csvParser(context.resources, R.raw.zagorodnie)
         return items
     }
 }
