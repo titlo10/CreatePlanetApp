@@ -87,8 +87,8 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, catalogStat
     when (selectedIndex) {
         0 -> HomePage()
         1 -> CatalogPage(catalogState = catalogState)
-        2 -> FavoritesPage()
-        3 -> OrdersPage()
+        2 -> FavoritesPage(authViewModel = authViewModel)
+        3 -> OrdersPage(authViewModel = authViewModel)
         4 -> ProfilePage(authViewModel = authViewModel)
     }
 }
