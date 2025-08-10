@@ -88,11 +88,6 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
     }
 
-    /**
-     * Function searches for favorite or ordered matching depends on what you specify
-     * @param fStatus - строка ("true" или "false")
-     * @param oStatus - строка ("true" или "false")
-     */
     /* Function searches for favorite matching */
     fun getFavoriteRecords(items: List<ItemsViewModel>) : ArrayList<ItemsViewModel> {
         val db = this.readableDatabase

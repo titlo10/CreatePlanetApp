@@ -10,6 +10,7 @@ import com.google.firebase.database.FirebaseDatabase
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val dbHelper : DBHelper = GlobalData.db
 
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
@@ -44,6 +45,7 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     _authState.value = AuthState.Authenticated
+                    migrateData()
                     _emailVerified.value = user?.isEmailVerified ?: false
                 } else {
                     _authState.value =
@@ -77,6 +79,7 @@ class AuthViewModel : ViewModel() {
                         .addOnCompleteListener {
                             auth.currentUser?.sendEmailVerification()
                             _authState.value = AuthState.Authenticated
+                            migrateData()
                             _emailVerified.value = false
                         }
                         .addOnFailureListener {
@@ -88,6 +91,38 @@ class AuthViewModel : ViewModel() {
                         AuthState.Error(task.exception?.message ?: "Что-то пошло не так")
                 }
             }
+    }
+
+    private fun migrateData() {
+        val favoriteItems = dbHelper.getFavoriteRecords(GlobalData.items)
+        val orderedItems = dbHelper.getOrderedRecords(GlobalData.items)
+        val userId = auth.currentUser?.uid
+
+        if (userId != null) {
+            val favOrderedRef = FirebaseDatabase.getInstance()
+                .getReference("users/$userId")
+                .child("FAVORITES_AND_ORDERED")
+
+            favoriteItems.forEach { excursion ->
+                val updates = HashMap<String, Any>()
+                updates["favorite"] = true
+                if (orderedItems.contains(excursion)) {
+                    updates["ordered"] = true
+                } else {
+                    updates["ordered"] = false
+                }
+                favOrderedRef.child(excursion.title).updateChildren(updates)
+            }
+
+            orderedItems.forEach { excursion ->
+                if (!favoriteItems.contains(excursion)) {
+                    val updates = HashMap<String, Any>()
+                    updates["favorite"] = false
+                    updates["ordered"] = true
+                    favOrderedRef.child(excursion.title).updateChildren(updates)
+                }
+            }
+        }
     }
 
     fun sendEmailVerification() {

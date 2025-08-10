@@ -11,13 +11,20 @@ import android.content.Context
  */
 object GlobalData {
     private var _items: ArrayList<ItemsViewModel>? = null  // Item — ваша модель данных
+    private var _db : DBHelper? = null
 
     val items: ArrayList<ItemsViewModel>
         get() = _items ?: throw IllegalStateException("Данные не загружены. Вызовите GlobalData.initialize()")
 
+    val db : DBHelper
+        get() = _db ?: throw IllegalStateException("Данные не загружены. Вызовите GlobalData.initialize()")
+
     fun initialize(context: Context) {
         if (_items == null) {
             _items = parseCsv(context)
+        }
+        if (_db == null) {
+            _db = DBHelper(context, null)
         }
     }
     private fun parseCsv(context: Context): ArrayList<ItemsViewModel> {
