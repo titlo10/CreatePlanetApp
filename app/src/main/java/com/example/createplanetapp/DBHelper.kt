@@ -12,13 +12,15 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     companion object {
         private const val DATABASE_NAME = "GOODS"
         private const val DATABASE_VERSION = 1
-        const val TABLE_NAME = "FAVORITE_AND_ORDERED"
+        const val TABLE_NAME = "SIMPLE_TABLE"
         const val ID_COL = "id"
         const val NAME_COL = "name"
-        const val FAVORITE_STATUS = "fStatus"
-        const val ORDERED_STATUS = "oStatus"
+        const val FAVORITE_STATUS = "favoriteStatus"
+        const val ORDERED_STATUS = "orderedStatus"
+        const val PAID_STATUS = "paidStatus"
 
-        // Статусы как строки
+        val STATUS_COLUMNS = listOf(FAVORITE_STATUS, ORDERED_STATUS, PAID_STATUS)
+
         const val STATUS_TRUE = "true"
         const val STATUS_FALSE = "false"
     }
@@ -29,7 +31,8 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
                 $ID_COL INTEGER PRIMARY KEY AUTOINCREMENT,
                 $NAME_COL TEXT UNIQUE,
                 $FAVORITE_STATUS TEXT,
-                $ORDERED_STATUS TEXT
+                $ORDERED_STATUS TEXT,
+                $PAID_STATUS TEXT
             )
         """.trimIndent()
         db.execSQL(query)
@@ -40,135 +43,81 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         onCreate(db)
     }
 
-    /** Sets favorite status for the record with specified name, creates a record if it doesn't exist */
-    fun setFavoriteStatus(name: String, fStatus: String) {
+    private fun setStatus(name: String, column: String, status: String) {
         val db = writableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $NAME_COL = '$name'", null)
+        val cursor = db.rawQuery(
+            "SELECT 1 FROM $TABLE_NAME WHERE $NAME_COL = ?",
+            arrayOf(name)
+        )
 
         val values = ContentValues().apply {
             put(NAME_COL, name)
-            put(FAVORITE_STATUS, fStatus)
+            put(column, status)
         }
 
         cursor.use {
             if (it.moveToFirst()) {
-                db.update(
-                    TABLE_NAME,
-                    values,
-                    "$NAME_COL = '$name'", null
-                )
+                db.update(TABLE_NAME, values, "$NAME_COL = ?", arrayOf(name))
             } else {
-                values.put(ORDERED_STATUS, STATUS_FALSE)
+                STATUS_COLUMNS.filter { it != column }.forEach { otherCol ->
+                    values.put(otherCol, STATUS_FALSE)
+                }
                 db.insert(TABLE_NAME, null, values)
             }
         }
     }
 
-    /** Sets ordered status for the record with specified name, creates a record if it doesn't exist */
-    fun setOrderedStatus(name: String, oStatus: String) {
-        val db = writableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $NAME_COL = '$name'", null)
+    /** Functions below set defined status for the record and creates it, if it doesn't exist */
 
-        val values = ContentValues().apply {
-            put(NAME_COL, name)
-            put(ORDERED_STATUS, oStatus)
-        }
+    fun setFavoriteStatus(name: String, status: String) = setStatus(name, FAVORITE_STATUS, status)
+    fun setOrderedStatus(name: String, status: String) = setStatus(name, ORDERED_STATUS, status)
+    fun setPaidStatus(name: String, status: String) = setStatus(name, PAID_STATUS, status)
 
-        cursor.use {
-            if (it.moveToFirst()) {
-                db.update(
-                    TABLE_NAME,
-                    values,
-                    "$NAME_COL = '$name'", null
-                )
-            } else {
-                values.put(FAVORITE_STATUS, STATUS_FALSE)
-                db.insert(TABLE_NAME, null, values)
-            }
-        }
-    }
+    private fun getRecords(items: List<ItemsViewModel>, column: String): ArrayList<ItemsViewModel> {
+        val db = readableDatabase
+        val result = ArrayList<ItemsViewModel>()
 
-    /* Function searches for favorite matching */
-    fun getFavoriteRecords(items: List<ItemsViewModel>) : ArrayList<ItemsViewModel> {
-        val db = this.readableDatabase
-
-        val favoriteItems = ArrayList<ItemsViewModel>()
-
-        val cursorTable : Cursor = db.rawQuery("""
-            SELECT * FROM $TABLE_NAME
-            WHERE $FAVORITE_STATUS = 'true'
-        """.trimIndent(), null)
+        val cursorTable = db.rawQuery(
+            "SELECT $NAME_COL FROM $TABLE_NAME WHERE $column = ?",
+            arrayOf(STATUS_TRUE)
+        )
 
         cursorTable.use { cursor ->
             if (cursor.moveToFirst()) {
                 do {
                     items.forEach {
-                        if(it.title == cursor.getString(1)) {
-                            favoriteItems.add(it)
+                        if(it.title == cursor.getString(0)) {
+                            result.add(it)
                         }
                     }
                 } while(cursor.moveToNext())
             }
         }
 
-        return favoriteItems
+        return result
     }
 
-    /* Function searches for ordered matching */
-    fun getOrderedRecords(items: List<ItemsViewModel>) : ArrayList<ItemsViewModel> {
-        val db = this.readableDatabase
+    /** Functions below searches for the defined status */
 
-        val orderedItems = ArrayList<ItemsViewModel>()
+    fun getFavoriteRecords(items: List<ItemsViewModel>) = getRecords(items, FAVORITE_STATUS)
+    fun getOrderedRecords(items: List<ItemsViewModel>) = getRecords(items, ORDERED_STATUS)
+    fun getPaidRecords(items: List<ItemsViewModel>) = getRecords(items, PAID_STATUS)
 
-        val cursorTable : Cursor = db.rawQuery("""
-            SELECT * FROM $TABLE_NAME
-            WHERE $ORDERED_STATUS = 'true'
-        """.trimIndent(), null)
+    private fun hasStatus(name: String, column: String): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT $column FROM $TABLE_NAME WHERE $NAME_COL = ?",
+            arrayOf(name)
+        )
 
-        cursorTable.use { cursor ->
-            if (cursor.moveToFirst()) {
-                do {
-                    items.forEach {
-                        if(it.title == cursor.getString(1)) {
-                            orderedItems.add(it)
-                        }
-                    }
-                } while(cursor.moveToNext())
-            }
-        }
-
-        return orderedItems
-    }
-
-    /** Function shows is element with title $name favorite or not */
-    fun isFavorite(name: String): Boolean {
-        val db = this.readableDatabase
-
-        val cursor : Cursor = db.rawQuery("""
-            SELECT $FAVORITE_STATUS FROM $TABLE_NAME 
-            WHERE $NAME_COL = ?
-        """.trimIndent(), arrayOf(name))
-
-        return try {
+        return cursor.use {
             if (cursor.moveToFirst()) cursor.getString(0) == STATUS_TRUE else false
-        } finally {
-            cursor.close()
         }
     }
 
-    /** Function shows is element with title $name ordered or not */
-    fun isOrdered(name: String): Boolean {
-        val db = this.readableDatabase
+    /** Functions below return the status value of specified name */
 
-        val cursor : Cursor = db.rawQuery("""
-            SELECT $ORDERED_STATUS FROM $TABLE_NAME 
-            WHERE $NAME_COL = ?
-        """.trimIndent(), arrayOf(name))
-
-        return try {
-            if (cursor.moveToFirst()) cursor.getString(0) == STATUS_TRUE else false
-        } finally {
-            cursor.close()
-        }
-    }
+    fun isFavorite(name: String) = hasStatus(name, FAVORITE_STATUS)
+    fun isOrdered(name: String) = hasStatus(name, ORDERED_STATUS)
+    fun isPaid(name: String) = hasStatus(name, PAID_STATUS)
 }
